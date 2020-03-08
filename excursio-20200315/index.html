@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Genera Imatge</title>
+  <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+body {
+  background: #212121;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+
+#myCanvas {
+  margin-top: 0%;
+}
+    </style>
+
+</head>
+<body>
+
+<canvas id="myCanvas" width="430px" height="600px"></canvas>
+<script>
+  // PROPERTIES
+// document elements
+// 
+var colors = [ 'red', 'green', 'tomato', 'DarkBlue', 'DarkViolet']
+var frase = [ "BUSQUEU", "LA", "MOTXILLA", "DESPISTADA" ]
+var goodColor = 'yellow'
+
+
+
+function randomColor(){
+  return(colors[Math.floor(Math.random() * colors.length)])
+}
+function randomLetter(){
+  var letter = "ABCÇDEFGHIJKLMNOPQRSTUVWXYZ"
+  var pos = Math.floor(Math.random() * letter.length)
+  return(letter.substring(pos, pos+1))
+}
+
+function write(context, lletre, color, x, y) {
+  context.fillStyle = color;
+  //var fontface = "Courier";
+  context.font = "50px Courier";
+  context.textAlign = 'left';
+  context.fillText(lletre, x * 30, (y+1) * 50);
+}
+function paintBG(context,color){
+  context.clearRect(0, 0, 360, 410);
+  context.fillStyle = color;
+  context.fillRect(0, 0, 360, 410)
+}
+function preparArray( max_x , max_y) {
+  var arr = new Array();
+  for(y=0;y < max_y; y++) {
+    arr[y] = new Array();
+    for(x=0;x < max_x; x++){
+      arr[y][x] = { letter:randomLetter() , color: randomColor() } 
+    }
+  }
+  return(arr)
+}
+function triaFila(primera, ultima, frasefalten){
+  var pos = Math.floor(Math.random() * (ultima - (primera + frasefalten + 1)))
+  return pos + primera + 1 
+}
+
+function escriuWord(word, color, soap, randY, maxX) {
+  var posX = Math.floor(Math.random() * (maxX - word.length))
+  for(var i = 0; i < word.length; i++){
+    soap[randY][i+posX] = {letter:word.substring(i), color: color}
+  }
+  return soap
+}
+
+function updateCanvas(listText) {
+  var X = 12
+  var Y = 8
+  var soap = preparArray(X, Y)
+
+  var randY  = 0
+  for(words = 0; words < listText.length; words++){
+    randY = triaFila(randY, Y, listText.length - words)
+    soap = escriuWord(listText[words],goodColor, soap, randY, X)
+  }
+
+  var c = document.getElementById("myCanvas");
+  var ctx = c.getContext("2d");
+  paintBG(ctx, '#000000')
+
+  for(y=0;y < Y; y++) {
+    for(x=0;x < X; x++){
+      write(ctx, soap[y][x].letter , soap[y][x].color, x, y)
+    }
+  }
+
+}
+updateCanvas(frase);
+
+</script>
+
+</body>
+</html>
