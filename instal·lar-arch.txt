@@ -78,6 +78,7 @@ echo LANGUAGE=ca_ES >> /etc/locale.conf
 echo LC_ALL=C >> /etc/locale.conf
 
 locale-gen
+# Això no genera correctament els locales S'ha de revisar!!!!
 
 # Configurar el teclat
 echo KEYMAP=es >> /etc/vconsole.conf
