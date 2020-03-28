@@ -1,0 +1,105 @@
+# Instal·lació de Arch linux a un T495 (20200328 - Confinement days) 
+# Based in https://gist.github.com/mattiaslundberg/8620837
+# Descarregar la imatge d'Arch:
+
+dd if=archlinux.img of=/dev/sdX bs=16M && sync # on linux
+
+# Arrancar del usb
+
+# Activa teclat espanyol
+loadkeys es
+
+# Configura el wifi
+wifi-menu
+
+# Crear les particions UEFI
+cgdisk //dev/nvme0n1
+1 100MB EFI partition # Hex code ef00
+2 250MB Boot partition # Hex code 8300
+3 100% size partiton # (to be encrypted) Hex code 8300
+
+mkfs.vfat -F32 /dev/nvme0n1p1
+mkfs.ext2 /dev/nvme0n1p2
+
+# Preparme la particion encriptada
+cryptsetup -c aes-xts-plain64 -y --use-random luksFormat /dev/nvme0n1p3
+cryptsetup luksOpen /dev/nvme0n1p3 luks
+
+# Creem la partició encriptada
+# Això crearà una partició per / (Si vols altres particions aquí s'ha de modificar)
+pvcreate /dev/mapper/luks
+vgcreate vg0 /dev/mapper/luks
+# Creem dos particions una de swap i l'altre no
+lvcreate --size 8G vg0 --name swap
+lvcreate -l +100%FREE vg0 --name root
+
+# Creem el sistem de fitxer a la partició encriptada
+mkfs.ext4 /dev/mapper/vg0-root
+mkswap /dev/mapper/vg0-swap
+
+# Muntem un nou sistema 
+# /mnt serà on hi haurà el sistema
+mount /dev/mapper/vg0-root /mnt 
+# Activem el Swap
+swapon /dev/mapper/vg0-swap
+# Muntem la partició de boot
+mkdir /mnt/boot
+mount /dev/nvme0n1p2 /mnt/boot
+# Muntem la partició EFI
+mkdir /mnt/boot/efi
+mount /dev/nvme0n1p1 /mnt/boot/efi
+
+# Install the system also includes stuff needed for starting wifi when first booting into the newly installed system
+# Unless vim and zsh are desired these can be removed from the command
+pacstrap /mnt base base-devel grub-efi-x86_64 zsh vim git efibootmgr dialog wpa_supplicant
+
+# 'install' fstab
+genfstab -pU /mnt >> /mnt/etc/fstab
+# Make /tmp a ramdisk (add the following line to /mnt/etc/fstab)
+tmpfs	/tmp	tmpfs	defaults,noatime,mode=1777	0	0
+# Change relatime on all non-boot partitions to noatime (reduces wear if using an SSD)
+
+# Enter the new system
+arch-chroot /mnt /bin/bash
+
+# Setup system clock
+ln -s /usr/share/zoneinfo/Europe/Stockholm /etc/localtime
+hwclock --systohc --utc
+
+# Set the hostname
+echo MYHOSTNAME > /etc/hostname
+
+# Update locale
+echo LANG=en_US.UTF-8 >> /etc/locale.conf
+echo LANGUAGE=en_US >> /etc/locale.conf
+echo LC_ALL=C >> /etc/locale.conf
+
+# Set password for root
+passwd
+
+# Add real user remove -s flag if you don't whish to use zsh
+# useradd -m -g users -G wheel -s /bin/zsh MYUSERNAME
+# passwd MYUSERNAME
+
+# Configure mkinitcpio with modules needed for the initrd image
+vim /etc/mkinitcpio.conf
+# Add 'ext4' to MODULES
+# Add 'encrypt' and 'lvm2' to HOOKS before filesystems
+
+# Regenerate initrd image
+mkinitcpio -p linux
+
+# Setup grub
+grub-install
+In /etc/default/grub edit the line GRUB_CMDLINE_LINUX to GRUB_CMDLINE_LINUX="cryptdevice=/dev/sdX3:luks:allow-discards" then run:
+grub-mkconfig -o /boot/grub/grub.cfg
+
+# Exit new system and go into the cd shell
+exit
+
+# Unmount all partitions
+umount -R /mnt
+swapoff -a
+
+# Reboot into the new system, don't forget to remove the cd/usb
+reboot
