@@ -1,6 +1,7 @@
 # Instal·lació de Arch linux a un T495 (20200328 - Confinement days) 
 # Based in https://gist.github.com/mattiaslundberg/8620837
-# Algunes modificacions, per canvis al propi arch
+# Algunes modificacions, per canvis al propi arch.
+# 202003280817 - Afegir instal·lació entorn gràfic.
 # Descarregar la imatge d'Arch:
 
 dd if=archlinux.img of=/dev/sdX bs=16M && sync # on linux
@@ -76,11 +77,16 @@ echo LANG=ca_ES.UTF-8 >> /etc/locale.conf
 echo LANGUAGE=ca_ES >> /etc/locale.conf
 echo LC_ALL=C >> /etc/locale.conf
 
+locale-gen
+
+# Configurar el teclat
+echo KEYMAP=es >> /etc/vconsole.conf
+
 # Posem un password a root
 passwd
 
-# Afegirm un usuari podem canviar el shell a /bin/bash o un altre si volem.
-useradd -m -g users -G wheel -s /bin/zsh MYUSERNAME
+# Afegirm un usuari podem canviar el shell a /bin/zsh o un altre si volem.
+useradd -m -g users -G wheel -s /bin/bash MYUSERNAME
 passwd MYUSERNAME
 
 # Configurem mkinitcpio amb el moduls necessaris per l'arranc de l'imatge.
@@ -104,5 +110,15 @@ exit
 umount -R /mnt
 swapoff -a
 
+# Editar el fitxer de sudoers perquè un usuari pugui executar sudo
+# Descomentar la linia "%wheel ALL=(ALL) ALL"
+
+# Definir fitxer de hosts
+echo "127.0.0.1   localhost" >> /etc/hosts
+echo "::1         localhost" >> /etc/hosts
+echo "127.0.1.1   haru.localdomain haru" >> /etc/hosts
+
 # Ja podem fer un reboot, sense oblidar treure el usb
 reboot
+
+
