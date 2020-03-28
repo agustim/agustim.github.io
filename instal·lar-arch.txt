@@ -121,4 +121,14 @@ echo "127.0.1.1   haru.localdomain haru" >> /etc/hosts
 # Ja podem fer un reboot, sense oblidar treure el usb
 reboot
 
+# Configurar xarxa (en el primer arranc no hi ha wifi!!)
+# Una vegada amb la xarxa
+
+sudo pacman -Suy
+
+sudo pacman -S xorg xorg-server
+sudo pacman -S gnome
+
+(Potser es podria ja instal·lar en l'entorn basic?)
+
 
