@@ -1,5 +1,6 @@
 # Instal·lació de Arch linux a un T495 (20200328 - Confinement days) 
 # Based in https://gist.github.com/mattiaslundberg/8620837
+# Algunes modificacions, per canvis al propi arch
 # Descarregar la imatge d'Arch:
 
 dd if=archlinux.img of=/dev/sdX bs=16M && sync # on linux
@@ -51,7 +52,7 @@ mount /dev/nvme0n1p1 /mnt/boot/efi
 
 # Insal·lem el mínim sistema que incloguí wifi per el seguent reboot tenir el nou sistema
 # Vim i zsh poden no ser inclosos, no son estrictament necessaris.
-pacstrap /mnt base base-devel grub-efi-x86_64 zsh vim git efibootmgr dialog wpa_supplicant
+pacstrap /mnt base base-devel grub-efi-x86_64 zsh vim git efibootmgr dialog wpa_supplicant linux linux-firmware lvm2
 
 # 'instal·lar' fstab
 genfstab -pU /mnt >> /mnt/etc/fstab
@@ -82,25 +83,26 @@ passwd
 useradd -m -g users -G wheel -s /bin/zsh MYUSERNAME
 passwd MYUSERNAME
 
-# Configure mkinitcpio with modules needed for the initrd image
+# Configurem mkinitcpio amb el moduls necessaris per l'arranc de l'imatge.
 vim /etc/mkinitcpio.conf
-# Add 'ext4' to MODULES
-# Add 'encrypt' and 'lvm2' to HOOKS before filesystems
+# Afegir 'ext4' a MODULES
+# Afegir 'encrypt' i 'lvm2' a HOOKS abans de filesystems
 
-# Regenerate initrd image
+# Regenerem els initcpio
 mkinitcpio -p linux
 
-# Setup grub
+# Configurar grub
 grub-install
-In /etc/default/grub edit the line GRUB_CMDLINE_LINUX to GRUB_CMDLINE_LINUX="cryptdevice=/dev/sdX3:luks:allow-discards" then run:
+vim /etc/default/grub 
+# Modifiquem GRUB_CMDLINE_LINUX="cryptdevice=/dev/nvme0n1p3:luks:allow-discards" 
 grub-mkconfig -o /boot/grub/grub.cfg
 
-# Exit new system and go into the cd shell
+# Sortim del "nou" sistema, tornem a la shell
 exit
 
-# Unmount all partitions
+# Desmontem totes les particions
 umount -R /mnt
 swapoff -a
 
-# Reboot into the new system, don't forget to remove the cd/usb
+# Ja podem fer un reboot, sense oblidar treure el usb
 reboot
