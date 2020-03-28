@@ -49,37 +49,38 @@ mount /dev/nvme0n1p2 /mnt/boot
 mkdir /mnt/boot/efi
 mount /dev/nvme0n1p1 /mnt/boot/efi
 
-# Install the system also includes stuff needed for starting wifi when first booting into the newly installed system
-# Unless vim and zsh are desired these can be removed from the command
+# Insal·lem el mínim sistema que incloguí wifi per el seguent reboot tenir el nou sistema
+# Vim i zsh poden no ser inclosos, no son estrictament necessaris.
 pacstrap /mnt base base-devel grub-efi-x86_64 zsh vim git efibootmgr dialog wpa_supplicant
 
-# 'install' fstab
+# 'instal·lar' fstab
 genfstab -pU /mnt >> /mnt/etc/fstab
-# Make /tmp a ramdisk (add the following line to /mnt/etc/fstab)
+# Fer /tmp un disk de ram, afegint ls seguent línia a /mnt/etc/fstab
 tmpfs	/tmp	tmpfs	defaults,noatime,mode=1777	0	0
-# Change relatime on all non-boot partitions to noatime (reduces wear if using an SSD)
+# Canviar relatime a totes les particions no-bootables a noatime (redueix el desgast si uses un SSD)
 
-# Enter the new system
+
+# Entrem al nou sistema (el chroot que té arch)
 arch-chroot /mnt /bin/bash
 
-# Setup system clock
-ln -s /usr/share/zoneinfo/Europe/Stockholm /etc/localtime
+# Actualitzem zona horaria més rellotge, ens sentim més aprop d'Andorra. :-)
+ln -s /usr/share/zoneinfo/Europe/Andorra /etc/localtime
 hwclock --systohc --utc
 
-# Set the hostname
-echo MYHOSTNAME > /etc/hostname
+# Definim el nom de la maquina
+echo "haru" > /etc/hostname
 
-# Update locale
-echo LANG=en_US.UTF-8 >> /etc/locale.conf
-echo LANGUAGE=en_US >> /etc/locale.conf
+# actualitzem les variables de localització
+echo LANG=ca_ES.UTF-8 >> /etc/locale.conf
+echo LANGUAGE=ca_ES >> /etc/locale.conf
 echo LC_ALL=C >> /etc/locale.conf
 
-# Set password for root
+# Posem un password a root
 passwd
 
-# Add real user remove -s flag if you don't whish to use zsh
-# useradd -m -g users -G wheel -s /bin/zsh MYUSERNAME
-# passwd MYUSERNAME
+# Afegirm un usuari podem canviar el shell a /bin/bash o un altre si volem.
+useradd -m -g users -G wheel -s /bin/zsh MYUSERNAME
+passwd MYUSERNAME
 
 # Configure mkinitcpio with modules needed for the initrd image
 vim /etc/mkinitcpio.conf
