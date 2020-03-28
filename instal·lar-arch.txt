@@ -153,3 +153,7 @@ git clone https://aur.archlinux.org/yay-git.git
 cd yay-git
 makepkg -sri
 
+# Configurar start de l'entorn de finestres
+systemctl start gdm.service
+systemctl enable gdm.service
+systemctl enable NetworkManager.service
