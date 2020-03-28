@@ -122,13 +122,34 @@ echo "127.0.1.1   haru.localdomain haru" >> /etc/hosts
 reboot
 
 # Configurar xarxa (en el primer arranc no hi ha wifi!!)
-# Una vegada amb la xarxa
+# Configurar ethernet (TODO configurar wifi)
+sudo ip l set enp5s0 up
+# Depent de la teva xarxa
+sudo ip a a ip 192.168.x.y/24 dev enp5s0
+# 192.168.x.z és el teu default gw
+sudo ip r a default 192.168.x.z 
 
+# Actualitzar Sistema
 sudo pacman -Suy
 
+# Instal·lar entorn de finestres
 sudo pacman -S xorg xorg-server
 sudo pacman -S gnome
 
 (Potser es podria ja instal·lar en l'entorn basic?)
 
+# Instal·lar firmwares 
+git clone https://aur.archlinux.org/aic94xx-firmware.git
+cd aic94xx-firmware
+makepkg -sri
+
+git clone https://aur.archlinux.org/wd719x-firmware.git
+cd wd719x-firmware
+makepkg -sri
+
+# Instal·lant yay
+
+git clone https://aur.archlinux.org/yay-git.git
+cd yay-git
+makepkg -sri
 
