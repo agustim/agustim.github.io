@@ -171,3 +171,9 @@ sudo pacman -S code
 
 # Fonts amb emojis
 sudo pacman -S ttf-joypixels
+
+# Instal·lar navegadors
+sudo pacman -S chromium firefox
+
+# Insta·lar extensió x extensions de gnome
+sudo pacman -S chrome-gnome-shell
