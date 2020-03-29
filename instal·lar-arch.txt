@@ -164,5 +164,10 @@ yay -S germinal
 
 # Per poder canviar la configuració de germinal
 # Ara ho pots canviar a dintre de dconf-editor al path org/gnome/Germinal
-pacman -S dconf-editor
+sudo pacman -S dconf-editor
 
+# Instal·lar visual code
+sudo pacman -S code
+
+# Fonts amb emojis
+sudo pacman -S ttf-joypixels
