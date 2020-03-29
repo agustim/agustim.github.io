@@ -158,3 +158,11 @@ makepkg -sri
 systemctl start gdm.service
 systemctl enable gdm.service
 systemctl enable NetworkManager.service
+
+# Instal·lar germinal i el confi
+yay -S germinal
+
+# Per poder canviar la configuració de germinal
+# Ara ho pots canviar a dintre de dconf-editor al path org/gnome/Germinal
+pacman -S dconf-editor
+
