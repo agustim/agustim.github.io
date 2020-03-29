@@ -184,8 +184,9 @@ yay -S gnome-shell-extension-dash-to-panel
 # Des de chromium https://extensions.gnome.org/local/ instal·lem dash-to-panel, clipboard-indicator i caffein
 
 # Docker
-
-
+sudo pacman -S docker docker-compose
+sudo systemctl enable docker
+sudo gpasswd -a agusti docker
 
 
 
