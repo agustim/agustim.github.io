@@ -198,6 +198,8 @@ sudo pacman -S bash-completion
 # Instal·lar cryfs
 sudo pacman -S cryfs
 
+# Instal·lar browser brave
+yay -S brave
 
 
 
