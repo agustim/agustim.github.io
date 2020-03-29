@@ -188,5 +188,16 @@ sudo pacman -S docker docker-compose
 sudo systemctl enable docker
 sudo gpasswd -a agusti docker
 
+# Udisks2
+# Automount system
+sudo pacman -S udisks2
+
+# Completar amb bash
+sudo pacman -S bash-completion
+
+# Instal·lar cryfs
+sudo pacman -S cryfs
+
+
 
 
