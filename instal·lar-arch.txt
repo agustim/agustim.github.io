@@ -75,7 +75,7 @@ echo "haru" > /etc/hostname
 # actualitzem les variables de localització
 echo LANG=ca_ES.UTF-8 >> /etc/locale.conf
 echo LANGUAGE=ca_ES >> /etc/locale.conf
-echo LC_ALL=C >> /etc/locale.conf
+echo LC_COLLATE=ca_ES.UTF-8 >> /etc/locale.conf
 
 locale-gen
 # Això no genera correctament els locales S'ha de revisar!!!!
