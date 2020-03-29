@@ -179,8 +179,13 @@ sudo pacman -S chromium firefox
 sudo pacman -S chrome-gnome-shell
 yay -S gnome-shell-extension-coverflow-alt-tab-git
 yay -S gnome-shell-extension-cast-to-tv-git
-yay -S gnome-shell-extension-caffeine-plus-git
 yay -S gnome-shell-extension-dash-to-panel
+
+# Des de chromium https://extensions.gnome.org/local/ instal·lem dash-to-panel, clipboard-indicator i caffein
+
+# Docker
+
+
 
 
 
