@@ -198,8 +198,13 @@ sudo pacman -S bash-completion
 # Instal·lar cryfs
 sudo pacman -S cryfs
 
-# Instal·lar browser brave
-yay -S brave
+# Instal·lar Clementine
+sudo pacman -S clementine
 
+# Instal·lar Rsync
+sudo pacman -S rsync
+
+# Instal·lar OpenBroadcaster Software
+sudo pacman -S obs-studio
 
 
