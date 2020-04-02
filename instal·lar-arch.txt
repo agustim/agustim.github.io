@@ -213,5 +213,25 @@ sudo pacman -S obs-studio
 # Instal·lar libreoffice i corrector Català
 yay -S libreoffice hunspell hunspell-es_es hunspell-ca
 
+# VPNs
+# l2tp
+yay -S networkmanager-l2tp
+# openvpn
+sudo pacman -S networkmanager-openvpn
+# wireguard ?
+yay -S networkmanager-wireguard
+
+# Impressora
+sudo pacman -S cups
+# Activem cups
+sudo systemctl start org.cups.cupsd
+sudo systemctl enable org.cups.cupsd
+
+# Impressora de casa
+yay -S epson-inkjet-printer-201113w
+
+# Database printer
+sudo pacman -S foomatic-db foomatic-db-engine foomatic-db-nonfree
+
 
 
