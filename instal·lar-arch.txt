@@ -233,5 +233,6 @@ yay -S epson-inkjet-printer-201113w
 # Database printer
 sudo pacman -S foomatic-db foomatic-db-engine foomatic-db-nonfree
 
-
+# Microsoft filesystems
+sudo pacman -S ntfs-3g
 
