@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="assets/museo-900.woff.css" media="screen" />
+</head>
+<body>
+<span style="font-family: 'Museo', cursive;">&nbsp;</span>
+<p><canvas id="marc" width=697 height=223></canvas></p>
+<p><textarea id="missatge"></textarea></p>
+<p><a id='download'><button>Download</button></a></p>
+<script>
+
+function wrapText(context, text, x, y, maxWidth, lineHeight) {
+        var words = text.split(' ');
+        var line = '';
+
+        for(var n = 0; n < words.length; n++) {
+          var testLine = line + words[n] + ' ';
+          var metrics = context.measureText(testLine);
+          var testWidth = metrics.width;
+          if (testWidth > maxWidth && n > 0) {
+            context.fillText(line, x, y);
+            line = words[n] + ' ';
+            y += lineHeight;
+          }
+          else {
+            line = testLine;
+          }
+        }
+        context.fillText(line, x, y);
+      }
+
+var lastmsg = ""
+var ctx = document.getElementById('marc').getContext('2d');
+var marc = new Image();
+marc.src = 'assets/marc.jpg';
+marc.onload = function(){
+  ctx.drawImage(this, 0,0,this.width, this.height);
+  document.getElementById('download').addEventListener('click', function() {
+    console.log('download')
+    downloadCanvas(this, 'marc', 'test.png');
+}, false);
+
+document.getElementById('missatge').addEventListener('input', function() {
+  console.log(this.value)
+  var maxWidth = 230
+  addMessages(ctx, this.value, (300 - maxWidth) / 2, 40, 230, 20)
+})
+}
+
+addMessages = function(ctx, msg, x, y, maxW, lineH) {
+  ctx.drawImage(marc, 0,0,marc.width, marc.height);
+  var marcX = x;
+  var marcY = y;
+  ctx.font         = '11pt Museo';
+  ctx.fillStyle = 'blacked';
+  ctx.textBaseline = 'top';
+  wrapText(ctx, msg, marcX, marcY,maxW,lineH )
+}
+
+function downloadCanvas(link, canvasId, filename) {
+    link.href = document.getElementById(canvasId).toDataURL();
+    console.log(link.href)
+    link.download = filename;
+}
+
+
+</script>
+</body>
+</html>
