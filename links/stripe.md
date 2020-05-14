@@ -6,3 +6,14 @@
 
 * Tradiccions, necessita un petit server o funcion lambda. https://gatstripe-cafe.netlify.app
 
+
+
+
+## Other examples
+
+https://stripe.com/docs/orders#define-products-skus
+https://stripe.com/docs/payments/save-and-reuse
+https://stripe.com/es/blog/smarter-saved-cards
+
+
+

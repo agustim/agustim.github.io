@@ -14,3 +14,8 @@ https://www.gwern.net/Faces
 # Avatar 
 
 https://github.com/alievk/avatarify
+
+# Cortex
+
+https://www.cortex.dev/
+
