@@ -41,7 +41,7 @@ openssl enc -aes256 -pbkdf2 -base64 -k $(base64 my_shared_secret.bin) -e -in mes
 ```
 
 # Desencrypt file
-## User 2 (I)
+## User 2 (You)
 ```
 openssl enc -aes256 -pbkdf2 -base64 -k $(base64 your_shared_secret.bin) -d -in secret.txt -out message.txt
 ```
