@@ -1,8 +1,7 @@
 La llotja
 =========
 
-És un joc tipus subata, la idea és que cada jugador té X (la mateixes) fixes de preu (100, 200, 500), i posen a subasta un paquet de peix, i cada jugador que fagi la 
-puja, una sola carta, i la més alta és queda el producte, la resta de jugadors recuperent la seva aposta.
+És un joc tipus subata, la idea és que cada jugador té X (la mateixes) cartes de preu (100, 200, 500), i posen a subasta un paquet de peix, i cada jugador que fagi la puja, una sola carta, i la més alta és queda el producte, la resta de jugadors recuperent la seva aposta.
 
 Abans de començar la subasta és reparteix cartes de "comandes", son els objectius que té cada jugador.
 
@@ -11,18 +10,14 @@ Quan s'acaba la subasta quan surt la carta de final de subasta o cap jugador s'h
 Prepara la partida
 ==================
 
-De les cartes de subastes fas dos piles, i a una d'elles l'insertes la carta de "fi de subasta", barreges les dues piles per separat i poses la pila que NO te la 
-carta de "fi de subasta" sobre de la que SI que la té.
+![Espai de Joc](gameschema.png)
 
-Reparteixe a cada jugador:
+Abans de començar:
 
-* ? cartes de 100
-* ? cartes de 200
-* ? carta de 500
-
-Barreges les fitxes d'objectius, i cada jugador agafa 3 cartes de comandes.
-
-Poses la pila al mig i el primer jugador dones la volta a una carta de subasta...
+1. De les cartes de subastes fas dos piles, i a una d'elles l'insertes la carta de "fi de subasta", barreges les dues piles per separat i poses la pila que NO te la carta de "fi de subasta" sobre de la que SI que la té.
+2. Reparteixe a cada jugador les cartes d'aposta
+3. Barreges les cartes d'objectius i es reparteixen tres cartes per cada jugador, la resta es posen en una pila posant-ne tres boca amunt a la vista de tots els jugadors.
+4. Poses la pila de subastes al mig i el primer jugador dones la volta a una carta de subasta...
 
 Comença la subasta
 ==================
