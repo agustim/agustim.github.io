@@ -1,0 +1,107 @@
+
+usb, installar
+amb docker
+
+## Configurar Docker
+sudo groupadd docker
+sudo usermod -aG docker $USER
+
+
+## Desbloquejar el disk des de ssh
+
+https://www.pbworks.net/ubuntu-guide-dropbear-ssh-server-to-unlock-luks-encrypted-pc/
+
+Configurar ssh in dropbear
+
+sudo apt install dropbear busybox
+
+Canvia a /etc/initramfs-tools/initramfs.conf
+
+BUSYBOX=y  ## Per defecte bé BUSYBOX=auto
+DROPBEAR=y
+
+sudo /usr/lib/dropbear/dropbearconvert dropbear openssh dropbear_rsa_host_key id_rsa
+sudo dropbearkey -y -f dropbear_rsa_host_key |grep "^ssh-rsa " > id_rsa.pub
+
+sudo echo “your public key” >> authorized_keys
+
+sudo nano /etc/default/dropbear
+# change NO_START=1  to NO_START=0 
+
+# Si volem canviar el port (millor pq sino hi haurà problema de falsos man-in-the-middle)
+# Editem /etc/dropbear-initramfs/config
+
+DROPBEAR_OPTIONS="-p 221"
+
+cd /etc/initramfs-tools/hooks/
+wget https://gist.githubusercontent.com/gusennan/712d6e81f5cf9489bd9f/raw/fda73649d904ee0437fe3842227ad8ac8ca487d1/crypt_unlock.sh
+
+sudo chmod +x /etc/initramfs-tools/hooks/crypt_unlock.sh
+
+sudo update-initramfs -u
+
+sudo systemctl disable dropbear
+
+# Si tenim slash l'hem de treure...
+# Editem /etc/default/grub
+
+GRUB_CMDLINE_LINUX_DEFAULT="quiet"
+
+sudo update-grub
+
+sudo reboot
+
+
+## Desbloquejar per ssh
+
+ssh root@IP -p 221
+cryptroot-unlock
+
+## Desbloquejar per pen?
+
+De moment no provat.
+
+
+## fail2ban
+sudo apt install fail2ban
+
+cat > /etc/fail2ban/fail2ban.local <<"EOF"
+# Basic Configuration
+[DEFAULT]
+loglevel = INFO
+logtarget = /var/log/fail2ban.log
+EOF
+
+
+cat > /etc/fail2ban/jail.local <<"EOF"
+
+# Basic Configuration
+[DEFAULT]
+bantime = 1800
+findtime = 600
+maxretry = 3
+backend = systemd
+ignoreip = 127.0.0.1/8 192.168.207.1/24 84.88.85.1/32
+EOF
+
+systemctl restart fail2ban
+
+## Golang
+
+sudo apk install golang
+
+cat >> ~/.profile <<"EOF"
+GOPATH=$HOME/go
+PATH="$GOPATH/bin:$PATH"
+EOF
+
+## Install utahfs client
+go get github.com/cloudflare/utahfs/cmd/utahfs-client
+
+
+
+
+
+
+
+
