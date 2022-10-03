@@ -134,7 +134,7 @@ sudo ip r a default 192.168.x.z
 sudo pacman -Suy
 
 # Instal·lar entorn de finestres
-sudo pacman -S xorg xorg-server
+# sudo pacman -S xorg xorg-server
 sudo pacman -S gnome
 
 (Potser es podria ja instal·lar en l'entorn basic?)
@@ -159,12 +159,16 @@ systemctl start gdm.service
 systemctl enable gdm.service
 systemctl enable NetworkManager.service
 
-# Instal·lar germinal i el confi
-yay -S germinal
-
 # Per poder canviar la configuració de germinal
 # Ara ho pots canviar a dintre de dconf-editor al path org/gnome/Germinal
 sudo pacman -S dconf-editor
+
+# Instal·lar germinal i el confi
+yay -S germinal
+# Arreglar germinal
+gsettings set org.gnome.Germinal backcolor '#000000'
+gsettings set org.gnome.Germinal forecolor '#ffffff'
+gsettings set org.gnome.Germinal font 'DejaVu Sans Mono 12'
 
 # Instal·lar visual code
 sudo pacman -S code
@@ -235,4 +239,5 @@ sudo pacman -S foomatic-db foomatic-db-engine foomatic-db-nonfree
 
 # Microsoft filesystems
 sudo pacman -S ntfs-3g
+
 
