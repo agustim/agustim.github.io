@@ -12,7 +12,17 @@ dd if=archlinux.img of=/dev/sdX bs=16M && sync # on linux
 loadkeys es
 
 # Configura el wifi
-wifi-menu
+# wifi-menu
+iwctl
+[iwd]# device list
+[iwd]# device wlan0 set-property Powered on
+[iwd]# adapter phy0 set-property Powered on
+[iwd]# station wlan0 scan
+[iwd]# station wlan0 get-networks
+[iwd]# station wlan0 connect SSID
+
+
+
 
 # Crear les particions UEFI
 cgdisk //dev/nvme0n1
@@ -53,7 +63,7 @@ mount /dev/nvme0n1p1 /mnt/boot/efi
 
 # Insal·lem el mínim sistema que incloguí wifi per el seguent reboot tenir el nou sistema
 # Vim i zsh poden no ser inclosos, no son estrictament necessaris.
-pacstrap /mnt base base-devel grub-efi-x86_64 zsh vim git efibootmgr dialog wpa_supplicant linux linux-firmware lvm2
+pacstrap /mnt base base-devel grub-efi-x86_64 zsh vim git efibootmgr dialog linux linux-firmware lvm2
 
 # 'instal·lar' fstab
 genfstab -pU /mnt >> /mnt/etc/fstab
