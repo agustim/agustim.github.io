@@ -250,4 +250,20 @@ sudo pacman -S foomatic-db foomatic-db-engine foomatic-db-nonfree
 # Microsoft filesystems
 sudo pacman -S ntfs-3g
 
+# Ultimament faig un backup dels paquets instal·lats i els recupero
+# Backup pacman
+pacman -Qqen> pkglist.txt
+# Backup de aur
+pacman -Qqem> pkglist_aur.txt
+
+# Instalar paquest al nou orginador:
+pacman -S --needed - < pkglist.txt
+
+# Instal·lar synty-shell
+git clone --recursive https://github.com/andresgongora/synth-shell.git
+cd synth-shell
+./setup.sh
+
+systemctl enable NetworkManager
+systemctl enable gdm
 
