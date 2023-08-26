@@ -267,3 +267,13 @@ cd synth-shell
 systemctl enable NetworkManager
 systemctl enable gdm
 
+
+# Kitty
+
+pacman -S kitty
+
+# Configurar al fitxer ~/.config/kitty/kitty.conf
+
+font_size 13.0
+enable_audio_bell no
+hide_window_decorations yes
