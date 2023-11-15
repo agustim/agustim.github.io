@@ -9,6 +9,8 @@ O baixar la iso amb un macos o https://mega.nz/file/GvoRBIxJ#SlfbJGdaPqDm4NMR3G2
 *  < 4GB de ram
 * HD de 80GB
 * Memoria video de 128
+* 3D actiu
+* Sense diskette
 
 ## Abans d'arrancar:
 
