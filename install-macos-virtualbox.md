@@ -30,6 +30,12 @@ VBoxManage setextradata "MacosSonoma" "VBoxInternal/TM/TSCMode" "RealTSCOffset"
 ## Aconseguir iso
 
 ## Preparar la maquina
+*  < 4GB de ram
+*  4 cpus
+* HD de 100GB
+* Memoria video de 128
+* 3D actiu
+* Sense diskette
 
 ## Abans d'arrancar
 ```
