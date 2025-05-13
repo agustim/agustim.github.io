@@ -1,128 +1,71 @@
-Arch Luks Easytier Ssh
-====
+# 🛠️ Setup EasyTier a Initramfs per Arch Linux
 
+Aquest script automatitza la instal·lació i configuració de **EasyTier VPN** en sistemes **Arch Linux**, integrant-lo al procés d’arrencada (`initramfs`) i configurant accés remot mitjançant **TinySSH**.
 
-La motivació d'aquest document és fer un sistema per [Archlinux](https://archlinux.org/), per tenir una maquina server a un espai remotamb el disc xifrat i que, durant l'arrencada (initramfs), el sistema es connecti a la xarxa per dhcp, activa un servei sshd, utilitzar [easytier](https://github.com/EasyTier/EasyTier) perquè es pugi accedir a la maquina en remot, i poder introduir la clau de pas per desxifrar el disc remotament.
+## 📦 Què fa aquest script?
 
-0. Prerequisits
+- Carrega variables des de `.env` (si existeix).
+- Verifica permisos de root.
+- Instal·la dependències (curl, unzip, paquets mkinitcpio...).
+- Descarrega i instal·la `easytier-core` des de GitHub.
+- Configura EasyTier a `/etc/initcpio/` com a hook d’inici.
+- Crea fitxers de configuració (`config.toml`) amb els valors proporcionats.
+- Configura TinySSH amb claus autoritzades i port personalitzat.
+- Modifica `mkinitcpio.conf` per incloure EasyTier al procés d’arrencada.
+- Modifica `GRUB` per permetre arrencada amb IP DHCP.
+- Regenera `initramfs` i la configuració de GRUB.
 
-He utilitzar un sistema archlinux amb instal·lació per defecte en aquest cas sense LVM, però 
+## 🚀 Requisits previs
 
-1. Instal·lació de paquets
+- Sistema operatiu **Arch Linux**.
+- Connexió a internet.
+- Execució com a **usuari root**.
 
+## 🔧 Paràmetres i variables d’entorn
+
+Es poden definir via `.env` o es demanaran durant l’execució:
+
+| Variable                   | Descripció                                                    |
+|---------------------------|----------------------------------------------------------------|
+| `EASYTIER_VERSION`         | Versió d'EasyTier (opcional, si no es passa s'usa per defecte `v2.2.3`) |
+| `EASYTIER_NETWORK_NAME`    | Nom de la xarxa EasyTier                                      |
+| `EASYTIER_NETWORK_SECRET`  | Secret compartit per a la xarxa                               |
+| `EASYTIER_PEER_URI`        | URI del servidor peer (ex: `public.easytier.cn`)                 |
+| `EASYTIER_REMOVE_WHEN_STARTED` | Si true, mata el procés EasyTier després de l’inici          |
+| `SSH_AUTHORIZED_KEYS`      | Ruta al fitxer de claus públiques SSH per TinySSH             |
+| `TINYSSH_PORT`             | Port del servei TinySSH (per defecte `22`)                    |
+
+## 📥 Ús
+
+```bash
+sudo ./setup-easytier-complet.sh
 ```
-pacman -S mkinitcpio mkinitcpio-busybox \        # bàsics
-             mkinitcpio-netconf mkinitcpio-nfs-utils \  # suport xarxa
-             mkinitcpio-tinyssh mkinitcpio-utils \       # SSH i eines
-             python3
- 
+
+O amb fitxer `.env`:
+
+```dotenv
+EASYTIER_NETWORK_NAME="xarxa_prova"
+EASYTIER_NETWORK_SECRET="secret123"
+EASYTIER_PEER_URI="peer.example.com"
+EASYTIER_REMOVE_WHEN_STARTED="true"
+SSH_AUTHORIZED_KEYS="ssh-rsa AAAAB3Nz..."
+TINYSSH_PORT=2222
 ```
-2. Instal·lar easytier
 
-3. Instal·lar nou plugin
-####  ```/etc/initcpio/install/easytier```
-```
-#!/bin/bash
+## 🧪 Resultat final
 
-build() {
-    add_file /usr/local/bin/easytier-core
-    add_file /etc/easytier/config.toml
-    add_checked_modules /drivers/net
-    add_module tun
-    add_runscript 
-}
-help() {
-    cat <<HELPEOF
-    This hook launches EasyTier VPN from initramfs.
-HELPEOF
-}
-```
-#### ```/etc/initcpio/hooks/easytier```
-```
-#!/bin/bash
+- EasyTier arrenca des del `initramfs`, permetent connexió de xarxa abans del `rootfs`.
+- Accés SSH disponible via TinySSH.
+- Ideal per servidors remots amb discos xifrats o necessitats de connexió primerenca.
 
-run_hook() {
-    echo "[easytier] Hook iniciat"
-    if [ -x /usr/local/bin/easytier-core ]; then
-        echo "[easytier] Executant easytier-core..."
-        /usr/local/bin/easytier-core -c /etc/easytier/config.toml > /dev/null 2>&1 &
-        echo "[easytier] Process easytier-core llançat" > /dev/console
-    else
-        echo "[easytier] Binari no trobat o no executable" > /dev/console
-    fi
-}
+## ⚠️ Advertències
 
-# cleanup no és habitual a initramfs, però pot ser útil si el hook s'executa múltiples vegades (per exemple, en reinicis d'emergència).
-run_cleanuphook() {
-    echo "[easytier] Finalitzant easytier-core..." > /dev/console
-    killall easytier-core
-}
-```
-#### ```/etc/easytier/config.toml```
-```
-instance_name = "default"
-dhcp = true
-listeners = [
-    "tcp://0.0.0.0:11010",
-    "udp://0.0.0.0:11010",
-    "wg://0.0.0.0:11011",
-    "ws://0.0.0.0:11011/",
-    "wss://0.0.0.0:11012/",
-]
-mapped_listeners = []
-exit_nodes = []
-rpc_portal = "0.0.0.0:15888"
+- Aquest script **modifica el GRUB i mkinitcpio**, assegura’t de tenir còpies de seguretat abans d’executar-lo.
+- Funciona exclusivament a sistemes **Arch Linux**.
+- Comprova la compatibilitat del teu hardware i xarxa amb EasyTier abans de desplegar-lo en producció.
 
-[network_identity]
-network_name = "<your_network_name>"
-network_secret = "<your_network_secret>"
+## 📚 Referències
 
-[[peer]]
-uri = "tcp://<your_server_or_public.easytier.cn>:11010"
-
-[flags]
-
-```
-4. Configurar mkinitcpio
-Modificar el fitxer ```/etc/mkinitcpio.conf```:
-
-Modificar la directiva ```FILES``` afegir els easytier-core i config.toml 
-```FILES=(/usr/local/bin/easytier-core /etc/easytier/config.toml ...)```
-
-On ... representa si tens més fitxers a afegir.
-
-Modificar la directiva ```HOOKS``` posar netconf, easytier, tinyssh, encryptssh després de blocks i abans de filesystems.
-I treure encrypt de l'arranc, perquè es queda bloquejat esperant que s'entri la clau.
-
-```HOOKS=(base udev ... block netconf easytier tinyssh encryptssh ... fsck)```
-
-On ... son els moduls que tu ja tinguis.
-
-
-5. Canviar tinyssh perquè vagi per una altre port
-
-
-6. Instal·lar mkinitcpio
-
-```sudo mkinitcpio -P```
-
-7. Configurar grub
-
-Editer el fitxer ```/etc/default/grub``` i modificar ```GRUB_CMDLINE_LINUX```
-
-```GRUB_CMDLINE_LINUX="cryptdevice=UUID=...  ip=:::::eth0:dhcp"```
-
-On ... representa el que ja tinguis a /etc/default/grub
-
-8. Instal·lar Grub
-
-```grub-mkconfig -o /boot/grub/grub.cfg```
-
-
-Bonus Track: Debuggar initram
-
-Al arrencar grub apretem ```e``` i al final de la línia del kernel, a vegades es diu ```linux```:
-* Treiem ```quiet```, que farà que es mostrin texts.
-* Afegim ```break=postmount```, quan acabi ens deixarà debugar initramfs, aband d'arrancar el nou init.
-
-
+- [EasyTier al GitHub](https://github.com/EasyTier/EasyTier)
+- [mkinitcpio Arch Wiki](https://wiki.archlinux.org/title/Mkinitcpio)
+- [TinySSH](https://tinyssh.org/)
