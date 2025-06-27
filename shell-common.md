@@ -26,4 +26,9 @@ Detectar les paraules d'intre d'un fitxer en pdf:
 ```ocrmypdf source.pdf destination.pdf```
 
 
+Netejar metadata:
+
+Més explicat a : https://gist.github.com/Te-k/e504d9586377c36c75ba131c4280f5fb 
+
+```exiftool -all= some.pdf```
 
