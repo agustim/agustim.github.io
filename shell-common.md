@@ -17,3 +17,13 @@ La resta a una altre fitxer (second_destin.pdf):
 ```pdftk source.pdf cat 4-end output second_destin.pdf```
 
 
+OCR:
+
+```yay -S ocrmypdf```
+
+Detectar les paraules d'intre d'un fitxer en pdf:
+
+```ocrmypdf source.pdf destination.pdf```
+
+
+
