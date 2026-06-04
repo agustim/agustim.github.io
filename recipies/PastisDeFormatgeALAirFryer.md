@@ -1,4 +1,4 @@
-# Pastís de formatge a l'air-fryer
+# Pastís de formatge a l'AirFryer
 
 ## Ingredients
 
