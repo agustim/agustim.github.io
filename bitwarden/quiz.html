@@ -1,0 +1,335 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Scanner: Edició Humana</title>
+    <style>
+        :root {
+            --bw-green: #175DDC;
+            --bw-dark: #232323;
+            --bg-color: #f0f2f5;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 { color: var(--bw-green); margin-bottom: 0.5rem; }
+        .subtitle { color: #666; margin-bottom: 2rem; }
+
+        /* Contenedor de preguntes */
+        .question-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .question-box {
+            display: none; /* Ocult per defecte */
+            animation: fadeIn 0.5s;
+        }
+
+        .question-box.active {
+            display: block;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            color: var(--bw-dark);
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            border-color: var(--bw-green);
+            background-color: #f0f7ff;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--bw-green);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Resultat */
+        .result-box {
+            display: none;
+            animation: slideUp 0.5s;
+        }
+
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--bw-green);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 auto 20px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .badge-user { background: #fff3cd; color: #856404; }
+        .badge-bitwarden { background: #e8f4fd; color: var(--bw-green); }
+
+        .tip-box {
+            background: #f8f9fa;
+            border-left: 4px solid var(--bw-green);
+            padding: 15px;
+            text-align: left;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .restart-btn {
+            background: var(--bw-dark);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 1rem;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>🛡️ Security Scanner</h1>
+    <p class="subtitle">Descobreix el teu nivell de seguretat digital</p>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+    </div>
+
+    <!-- Pregunta 1 -->
+    <div class="question-box active" id="q1">
+        <div class="question-text">1. El teu navegador et proposa guardar la contrasenya del banc. Què fas?</div>
+        <div class="options">
+            <button class="option-btn" onclick="nextQuestion(0)">✅ Accepto, és molt còmode.</button>
+            <button class="option-btn" onclick="nextQuestion(10)">❌ No, utilitzo un gestor (Bitwarden).</button>
+            <button class="option-btn" onclick="nextQuestion(5)">🤔 Depèn del servei.</button>
+        </div>
+    </div>
+
+    <!-- Pregunta 2 -->
+    <div class="question-box" id="q2">
+        <div class="question-text">2. Com de freqüència canvies les contrasenyes principals?</div>
+        <div class="options">
+            <button class="option-btn" onclick="nextQuestion(10)">🔄 Cada 3-6 mesos.</button>
+            <button class="option-btn" onclick="nextQuestion(5)">📅 Cada any o quan me'n recordo.</button>
+            <button class="option-btn" onclick="nextQuestion(0)">🚫 Mai, si funciona, no toquis.</button>
+        </div>
+    </div>
+
+    <!-- Pregunta 3 -->
+    <div class="question-box" id="q3">
+        <div class="question-text">3. Tens activat el 2FA (Autenticació de dos factors)?</div>
+        <div class="options">
+            <button class="option-btn" onclick="nextQuestion(10)">📱 Sí, amb App (Authenticator) o Clau física.</button>
+            <button class="option-btn" onclick="nextQuestion(5)">📧 Sí, però només per SMS/Email.</button>
+            <button class="option-btn" onclick="nextQuestion(0)">🙅 No, és massa molest.</button>
+        </div>
+    </div>
+
+    <!-- Pregunta 4 -->
+    <div class="question-box" id="q4">
+        <div class="question-text">4. Has configurat el Bitwarden al mòbil i a l'ordinador?</div>
+        <div class="options">
+            <button class="option-btn" onclick="nextQuestion(10)">🔄 Sí, sincronitzat en tots els dispositius.</button>
+            <button class="option-btn" onclick="nextQuestion(5)">💻 Només a l'ordinador.</button>
+            <button class="option-btn" onclick="nextQuestion(0)">❓ No ho sé / No el tinc.</button>
+        </div>
+    </div>
+
+    <!-- Resultat -->
+    <div class="result-box" id="result">
+        <div class="score-circle" id="finalScore">0</div>
+        <h2 id="rankTitle">Analitzant...</h2>
+        <p id="rankDesc">...</p>
+        
+        <div id="statusBadge" class="badge badge-user">Estatus: Desconegut</div>
+
+        <div class="tip-box" id="tipText">
+            <!-- Consells dinàmics -->
+        </div>
+
+        <button class="restart-btn" onclick="location.reload()">Tornar a provar</button>
+    </div>
+</div>
+
+<script>
+    let currentScore = 0;
+    let currentQuestionIndex = 0;
+    const totalQuestions = 4;
+
+    function nextQuestion(points) {
+        currentScore += points;
+        currentQuestionIndex++;
+
+        // 1. Actualitzar barra de progrés
+        const progressPct = (currentQuestionIndex / totalQuestions) * 100;
+        document.getElementById('progress').style.width = progressPct + "%";
+
+        // 2. Amagar la pregunta actual
+        // Busquem la pregunta que està activa ara mateix
+        const activeQ = document.querySelector('.question-box.active');
+        if (activeQ) {
+            activeQ.classList.remove('active');
+        }
+
+        // 3. Comprovar si hem acabat
+        if (currentQuestionIndex < totalQuestions) {
+            // Mostrar la següent pregunta
+            const nextQId = 'q' + (currentQuestionIndex + 1);
+            const nextQ = document.getElementById(nextQId);
+            if (nextQ) {
+                nextQ.classList.add('active');
+            }
+        } else {
+            // Hem acabat les preguntes, mostrar resultat
+            showResult();
+        }
+    }
+
+    function showResult() {
+        // Amagar l'última pregunta si encara està visible (seguretat)
+        const lastQ = document.getElementById('q4');
+        if(lastQ) lastQ.classList.remove('active');
+
+        // Mostrar el div de resultat
+        const resultDiv = document.getElementById('result');
+        resultDiv.style.display = 'block';
+
+        // Animar el comptador
+        let displayScore = 0;
+        const interval = setInterval(() => {
+            if (displayScore < currentScore) {
+                displayScore++;
+                document.getElementById('finalScore').innerText = displayScore;
+            } else {
+                clearInterval(interval);
+                finalizeResult(currentScore);
+            }
+        }, 20);
+    }
+
+    function finalizeResult(score) {
+        const title = document.getElementById('rankTitle');
+        const desc = document.getElementById('rankDesc');
+        const tip = document.getElementById('tipText');
+        const badge = document.getElementById('statusBadge');
+
+        // Lògica de resultats
+        if (score <= 10) {
+            title.innerText = "🚨 Zona de Perill";
+            desc.innerText = "Els teus hàbits actuals et deixen molt exposat. Les contrasenyes fàcils o repetides són el punt feble.";
+            tip.innerHTML = "<strong>Recomanació urgent:</strong> Instal·la el Bitwarden avui mateix. Comença per canviar la contrasenya del correu electrònic.";
+            badge.innerText = "Estatus: Principiant Vulnerable";
+            badge.className = "badge badge-user";
+        } else if (score <= 20) {
+            title.innerText = "⚠️ Nivell Mitjà";
+            desc.innerText = "Tens bones intencions però falten eines. Utilitzes el navegador per guardar contrasenyes, que no és el més segur.";
+            tip.innerHTML = "<strong>Millora ràpida:</strong> Migra les teves contrasenyes del navegador al Bitwarden. Activa el 2FA al Bitwarden.";
+            badge.innerText = "Estatus: Usuari Caut";
+            badge.className = "badge badge-user";
+        } else if (score <= 30) {
+            title.innerText = "✅ Nivell Sòlid";
+            desc.innerText = "Molt bé! Sembla que utilitzes eines de seguretat. La teva configuració és decent.";
+            tip.innerHTML = "<strong>Consell Pro:</strong> Comprova si tens contrasenyes filtrades a 'Have I Been Pwned'. Assegura't que el 2FA del Bitwarden sigui amb App, no SMS.";
+            badge.innerText = "Estatus: Bitwarden Usuari Actiu";
+            badge.className = "badge badge-bitwarden";
+        } else {
+            title.innerText = "🏆 Mestra de la Seguretat";
+            desc.innerText = "Impressionant! Els teus hàbits són exemplars. Protegescs les teves dades com cal.";
+            tip.innerHTML = "<strong>Consell Extra:</strong> Considera compartir una 'Vault' segura amb familiars o fer audits periòdics.";
+            badge.innerText = "Estatus: Guardioà";
+            badge.className = "badge badge-bitwarden";
+        }
+    }
+</script>
+
+</body>
+</html>
+
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+                    
