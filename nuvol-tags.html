@@ -2,12 +2,16 @@
 <html lang="ca">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Núvol de tags</title>
 <style>
+  * { box-sizing: border-box; }
   body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f4; }
   h1 { font-size: 20px; }
   #panel { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
-  fieldset { border: 1px solid #ccc; border-radius: 6px; }
+  fieldset { border: 1px solid #ccc; border-radius: 6px; flex: 1 1 220px; min-width: 200px; }
+  #svgWrap svg { max-width: 100%; height: auto; display: block; }
+  .tableScroll { overflow-x: auto; }
   #colors { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
   #colors input[type=color] { width: 36px; height: 30px; padding: 0; border: none; cursor: pointer; }
   .colorWrap { position: relative; }
@@ -26,6 +30,15 @@
   #tagTable button.step { width: 22px; height: 22px; line-height: 1; padding: 0; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; background: #f0f0f0; }
   #tagTable tr.excluded input[type=text], #tagTable tr.excluded input[type=number] { color: #aaa; text-decoration: line-through; }
   #tagTable button.del { background: #d33; color: #fff; border: none; border-radius: 4px; cursor: pointer; padding: 2px 8px; }
+  #tagTable { min-width: 420px; }
+
+  @media (max-width: 600px) {
+    body { margin: 10px; }
+    #panel { flex-direction: column; gap: 12px; padding: 12px; }
+    fieldset { width: 100%; }
+    #canvasW, #canvasH { width: 100px; }
+    #tableSection { padding: 12px; }
+  }
 </style>
 </head>
 <body>
@@ -81,10 +94,12 @@
     <strong>Taula de paraules</strong>
   </div>
   <div id="tableBody">
-    <table id="tagTable">
-      <thead><tr><th>Incloure</th><th>Paraula</th><th>Pes</th><th></th></tr></thead>
-      <tbody id="tagTableBody"></tbody>
-    </table>
+    <div class="tableScroll">
+      <table id="tagTable">
+        <thead><tr><th>Incloure</th><th>Paraula</th><th>Pes</th><th></th></tr></thead>
+        <tbody id="tagTableBody"></tbody>
+      </table>
+    </div>
     <button type="button" class="action" id="addRow">+ afegir paraula</button>
   </div>
 </div>
