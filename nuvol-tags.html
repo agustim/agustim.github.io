@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<title>Núvol de tags</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f4; }
+  h1 { font-size: 20px; }
+  #panel { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+  fieldset { border: 1px solid #ccc; border-radius: 6px; }
+  #colors { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  #colors input[type=color] { width: 36px; height: 30px; padding: 0; border: none; cursor: pointer; }
+  .colorWrap { position: relative; }
+  .colorWrap button { position: absolute; top: -6px; right: -6px; width: 16px; height: 16px; font-size: 10px; line-height: 1; border-radius: 50%; border: none; background: #d33; color: #fff; cursor: pointer; padding: 0; }
+  button.action { padding: 6px 12px; cursor: pointer; }
+  label { display: block; font-size: 13px; margin-bottom: 4px; }
+  input[type=number] { width: 70px; }
+  #svgWrap { margin-top: 20px; background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.15); overflow: auto; }
+  #status { font-size: 13px; color: #555; margin-top: 8px; }
+  #tableSection { margin-top: 20px; background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+  #tagTable { border-collapse: collapse; width: 100%; max-width: 700px; }
+  #tagTable th, #tagTable td { border-bottom: 1px solid #eee; padding: 4px 8px; text-align: left; font-size: 13px; }
+  #tagTable input[type=text] { width: 100%; box-sizing: border-box; }
+  #tagTable td.weightCell { display: flex; align-items: center; gap: 4px; border-bottom: none; }
+  #tagTable input[type=number] { width: 55px; text-align: center; }
+  #tagTable button.step { width: 22px; height: 22px; line-height: 1; padding: 0; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; background: #f0f0f0; }
+  #tagTable tr.excluded input[type=text], #tagTable tr.excluded input[type=number] { color: #aaa; text-decoration: line-through; }
+  #tagTable button.del { background: #d33; color: #fff; border: none; border-radius: 4px; cursor: pointer; padding: 2px 8px; }
+</style>
+</head>
+<body>
+
+<h1>Generador de núvol de tags</h1>
+
+<div id="panel">
+  <fieldset>
+    <legend>Fons</legend>
+    <label>Color de fons <input type="color" id="bgColor" value="#ffffff"></label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Colors de text (es van seleccionant en cicle)</legend>
+    <div id="colors"></div>
+    <button type="button" class="action" id="addColor">+ afegir color</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>Paraules i pes</legend>
+    <label>Fitxer JSON o CSV (paraula,pes) <input type="file" id="wordsFile" accept=".json,.csv,text/csv,application/json"></label>
+    <div id="status"></div>
+    <div style="font-size:12px;color:#666;max-width:220px;margin-top:6px;">O edita/afegeix paraules directament a la taula de sota.</div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Mida llenç</legend>
+    <label>Amplada <input type="number" id="canvasW" value="900"></label>
+    <label>Alçada <input type="number" id="canvasH" value="600"></label>
+    <label>Mida font mín/màx
+      <input type="number" id="fontMin" value="14" style="width:50px">
+      -
+      <input type="number" id="fontMax" value="90" style="width:50px">
+    </label>
+    <label><input type="checkbox" id="allowVertical" checked> permetre paraules verticals</label>
+    <label>Marge entre paraules (px)
+      <input type="number" id="margin" value="2" min="-10" max="40" step="1">
+    </label>
+    <label><input type="checkbox" id="autoFit" checked> ajustar llenç al contingut (retalla espai buit)</label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Acció</legend>
+    <button type="button" class="action" id="generate">Generar núvol</button><br><br>
+    <button type="button" class="action" id="downloadSvg">Descarregar SVG</button>
+    <button type="button" class="action" id="downloadPng">Descarregar PNG</button>
+  </fieldset>
+</div>
+
+<div id="tableSection">
+  <div id="tableHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px;">
+    <span id="toggleIcon">&#9660;</span>
+    <strong>Taula de paraules</strong>
+  </div>
+  <div id="tableBody">
+    <table id="tagTable">
+      <thead><tr><th>Incloure</th><th>Paraula</th><th>Pes</th><th></th></tr></thead>
+      <tbody id="tagTableBody"></tbody>
+    </table>
+    <button type="button" class="action" id="addRow">+ afegir paraula</button>
+  </div>
+</div>
+
+<div id="svgWrap"></div>
+
+<script>
+const DEFAULT_COLORS = ['#e63946', '#1d3557', '#2a9d8f', '#f4a261', '#6a4c93'];
+
+// ---------- Colors UI ----------
+const colorsDiv = document.getElementById('colors');
+
+function addColorInput(value) {
+  const wrap = document.createElement('span');
+  wrap.className = 'colorWrap';
+  const input = document.createElement('input');
+  input.type = 'color';
+  input.value = value || '#000000';
+  const rm = document.createElement('button');
+  rm.textContent = 'x';
+  rm.title = 'eliminar';
+  rm.onclick = () => wrap.remove();
+  wrap.appendChild(input);
+  wrap.appendChild(rm);
+  colorsDiv.appendChild(wrap);
+}
+
+DEFAULT_COLORS.forEach(addColorInput);
+document.getElementById('addColor').onclick = () => addColorInput('#000000');
+
+function getSelectedColors() {
+  const inputs = colorsDiv.querySelectorAll('input[type=color]');
+  const arr = Array.from(inputs).map(i => i.value);
+  return arr.length ? arr : ['#000000'];
+}
+
+// ---------- File parsing ----------
+document.getElementById('wordsFile').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  try {
+    const parsed = parseWordsFile(file.name, text);
+    tagRows = parsed.map(w => ({ text: w.text, weight: w.weight, included: true }));
+    document.getElementById('status').textContent = `${tagRows.length} paraules carregades.`;
+    renderTagTable();
+  } catch (err) {
+    document.getElementById('status').textContent = 'Error llegint fitxer: ' + err.message;
+  }
+});
+
+// ---------- Editable tag table ----------
+let tagRows = []; // [{text, weight, included}]
+const tagTableBody = document.getElementById('tagTableBody');
+
+function renderTagTable() {
+  tagTableBody.innerHTML = '';
+  tagRows.forEach((row, idx) => {
+    const tr = document.createElement('tr');
+    if (!row.included) tr.classList.add('excluded');
+
+    const tdCheck = document.createElement('td');
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.checked = row.included;
+    chk.onchange = () => { row.included = chk.checked; tr.classList.toggle('excluded', !row.included); };
+    tdCheck.appendChild(chk);
+
+    const tdText = document.createElement('td');
+    const txt = document.createElement('input');
+    txt.type = 'text';
+    txt.value = row.text;
+    txt.onchange = () => { row.text = txt.value; };
+    tdText.appendChild(txt);
+
+    const tdWeight = document.createElement('td');
+    tdWeight.className = 'weightCell';
+    const minus = document.createElement('button');
+    minus.type = 'button';
+    minus.className = 'step';
+    minus.textContent = '-';
+    const num = document.createElement('input');
+    num.type = 'number';
+    num.value = row.weight;
+    num.min = 1;
+    num.step = 1;
+    const commit = () => {
+      let v = parseInt(num.value, 10);
+      if (isNaN(v) || v < 1) v = 1;
+      row.weight = v;
+      num.value = v;
+    };
+    num.onchange = commit;
+    num.oninput = () => { num.value = num.value.replace(/[^0-9]/g, ''); };
+    const plus = document.createElement('button');
+    plus.type = 'button';
+    plus.className = 'step';
+    plus.textContent = '+';
+    minus.onclick = () => { num.value = Math.max(1, (parseInt(num.value, 10) || 1) - 1); commit(); };
+    plus.onclick = () => { num.value = (parseInt(num.value, 10) || 0) + 1; commit(); };
+    tdWeight.appendChild(minus);
+    tdWeight.appendChild(num);
+    tdWeight.appendChild(plus);
+
+    const tdDel = document.createElement('td');
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'del';
+    del.textContent = 'x';
+    del.onclick = () => { tagRows.splice(idx, 1); renderTagTable(); };
+    tdDel.appendChild(del);
+
+    tr.appendChild(tdCheck);
+    tr.appendChild(tdText);
+    tr.appendChild(tdWeight);
+    tr.appendChild(tdDel);
+    tagTableBody.appendChild(tr);
+  });
+}
+
+document.getElementById('addRow').onclick = () => {
+  tagRows.push({ text: '', weight: 10, included: true });
+  renderTagTable();
+};
+
+function getActiveWords() {
+  return tagRows
+    .filter(r => r.included && r.text.trim() && !isNaN(r.weight) && r.weight > 0)
+    .map(r => ({ text: r.text.trim(), weight: r.weight }));
+}
+
+// ---------- Collapse/expand table ----------
+document.getElementById('tableHeader').onclick = () => {
+  const body = document.getElementById('tableBody');
+  const icon = document.getElementById('toggleIcon');
+  const hidden = body.style.display === 'none';
+  body.style.display = hidden ? '' : 'none';
+  icon.innerHTML = hidden ? '&#9660;' : '&#9654;';
+};
+
+function parseWordsFile(filename, text) {
+  if (filename.toLowerCase().endsWith('.json')) {
+    const json = JSON.parse(text);
+    if (Array.isArray(json)) {
+      return json.map(item => ({
+        text: String(item.text ?? item.word ?? item.name ?? Object.values(item)[0]),
+        weight: Number(item.weight ?? item.value ?? item.pes ?? item.count ?? Object.values(item)[1])
+      })).filter(w => w.text && !isNaN(w.weight));
+    }
+    // object map { paraula: pes }
+    return Object.entries(json).map(([k, v]) => ({ text: k, weight: Number(v) }));
+  }
+  // CSV
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const out = [];
+  for (const line of lines) {
+    const parts = line.split(',');
+    if (parts.length < 2) continue;
+    const word = parts[0].trim();
+    const weight = Number(parts[1].trim());
+    if (!word || isNaN(weight)) continue; // skip header/invalid
+    out.push({ text: word, weight });
+  }
+  return out;
+}
+
+// ---------- Layout algorithm (spiral, bounding-box collision) ----------
+function measureWord(ctx, text, fontSize, fontFamily) {
+  ctx.font = `bold ${fontSize}px ${fontFamily}`;
+  const m = ctx.measureText(text);
+  const w = m.width;
+  const h = (m.actualBoundingBoxAscent || fontSize * 0.8) + (m.actualBoundingBoxDescent || fontSize * 0.2);
+  return { w, h };
+}
+
+function rectsOverlap(a, b) {
+  return !(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y);
+}
+
+function layoutWords(words, opts) {
+  const { canvasW, canvasH, fontMin, fontMax, allowVertical, fontFamily = 'Arial', margin = 2 } = opts;
+  const measureCanvas = document.createElement('canvas');
+  const ctx = measureCanvas.getContext('2d');
+
+  const sorted = [...words].sort((a, b) => b.weight - a.weight);
+  const minW = Math.min(...sorted.map(w => w.weight));
+  const maxW = Math.max(...sorted.map(w => w.weight));
+
+  const scaleFont = (weight) => {
+    if (maxW === minW) return (fontMin + fontMax) / 2;
+    return fontMin + ((weight - minW) / (maxW - minW)) * (fontMax - fontMin);
+  };
+
+  const placed = [];
+  const cx = canvasW / 2;
+  const cy = canvasH / 2;
+  const radiusStep = 3; // finer step = tighter packing
+
+  for (const item of sorted) {
+    const fontSize = scaleFont(item.weight);
+    const vertical = allowVertical && Math.random() < 0.25;
+    const { w: tw, h: th } = measureWord(ctx, item.text, fontSize, fontFamily);
+    const boxW = (vertical ? th : tw) + margin * 2;
+    const boxH = (vertical ? tw : th) + margin * 2;
+
+    let found = null;
+    const maxRadius = Math.max(canvasW, canvasH);
+    // Archimedean spiral search
+    for (let radius = 0; radius <= maxRadius && !found; radius += radiusStep) {
+      const angleStep = radius === 0 ? 1 : Math.max(0.1, radiusStep / radius);
+      for (let angle = 0; angle < Math.PI * 2; angle += angleStep) {
+        const x = cx + radius * Math.cos(angle) - boxW / 2;
+        const y = cy + radius * Math.sin(angle) - boxH / 2;
+        if (x < 0 || y < 0 || x + boxW > canvasW || y + boxH > canvasH) continue;
+        const candidate = { x, y, w: boxW, h: boxH };
+        if (!placed.some(p => rectsOverlap(p, candidate))) {
+          found = candidate;
+          break;
+        }
+      }
+    }
+
+    if (!found) continue; // no space found, skip word
+
+    placed.push(Object.assign(found, {
+      text: item.text,
+      fontSize,
+      vertical,
+      tw, th
+    }));
+  }
+
+  return placed;
+}
+
+function fitCanvasToContent(placed, margin) {
+  if (!placed.length) return { offsetX: 0, offsetY: 0, width: 0, height: 0 };
+  const minX = Math.min(...placed.map(p => p.x));
+  const minY = Math.min(...placed.map(p => p.y));
+  const maxX = Math.max(...placed.map(p => p.x + p.w));
+  const maxY = Math.max(...placed.map(p => p.y + p.h));
+  const pad = Math.max(margin, 4);
+  for (const p of placed) {
+    p.x = p.x - minX + pad;
+    p.y = p.y - minY + pad;
+  }
+  return { width: maxX - minX + pad * 2, height: maxY - minY + pad * 2 };
+}
+
+// ---------- SVG rendering ----------
+function renderSvg(placed, opts) {
+  const { canvasW, canvasH, bgColor, colors, fontFamily = 'Arial' } = opts;
+  let colorIdx = 0;
+  const nextColor = () => {
+    const c = colors[colorIdx % colors.length];
+    colorIdx++;
+    return c;
+  };
+
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasW}" height="${canvasH}" viewBox="0 0 ${canvasW} ${canvasH}">`;
+  svg += `<rect x="0" y="0" width="${canvasW}" height="${canvasH}" fill="${bgColor}"/>`;
+
+  for (const p of placed) {
+    const color = nextColor();
+    const centerX = p.x + p.w / 2;
+    const centerY = p.y + p.h / 2;
+    const rotate = p.vertical ? -90 : 0;
+    svg += `<text x="${centerX}" y="${centerY}" transform="rotate(${rotate} ${centerX} ${centerY})" `
+         + `font-family="${fontFamily}" font-weight="bold" font-size="${p.fontSize.toFixed(1)}" `
+         + `fill="${color}" text-anchor="middle" dominant-baseline="middle">${escapeXml(p.text)}</text>`;
+  }
+  svg += '</svg>';
+  return svg;
+}
+
+function escapeXml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ---------- Wire up buttons ----------
+document.getElementById('generate').onclick = () => {
+  const wordsData = getActiveWords();
+  if (!wordsData.length) {
+    document.getElementById('status').textContent = 'Afegeix o carrega paraules a la taula primer.';
+    return;
+  }
+  const opts = {
+    canvasW: Number(document.getElementById('canvasW').value),
+    canvasH: Number(document.getElementById('canvasH').value),
+    fontMin: Number(document.getElementById('fontMin').value),
+    fontMax: Number(document.getElementById('fontMax').value),
+    allowVertical: document.getElementById('allowVertical').checked,
+    margin: Number(document.getElementById('margin').value),
+    bgColor: document.getElementById('bgColor').value,
+    colors: getSelectedColors()
+  };
+  const placed = layoutWords(wordsData, opts);
+  if (document.getElementById('autoFit').checked) {
+    const fitted = fitCanvasToContent(placed, opts.margin);
+    opts.canvasW = fitted.width;
+    opts.canvasH = fitted.height;
+  }
+  const svg = renderSvg(placed, opts);
+  document.getElementById('svgWrap').innerHTML = svg;
+};
+
+document.getElementById('downloadSvg').onclick = () => {
+  const svgEl = document.querySelector('#svgWrap svg');
+  if (!svgEl) return;
+  const blob = new Blob([svgEl.outerHTML], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'nuvol-tags.svg';
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+document.getElementById('downloadPng').onclick = () => {
+  const svgEl = document.querySelector('#svgWrap svg');
+  if (!svgEl) return;
+  const w = Number(svgEl.getAttribute('width'));
+  const h = Number(svgEl.getAttribute('height'));
+  const svgBlob = new Blob([svgEl.outerHTML], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(svgBlob);
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    URL.revokeObjectURL(url);
+    canvas.toBlob(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'nuvol-tags.png';
+      a.click();
+    });
+  };
+  img.src = url;
+};
+</script>
+
+</body>
+</html>
